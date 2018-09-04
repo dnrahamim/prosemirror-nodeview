@@ -41,7 +41,8 @@ function insertDino(type, dinoType) {
   }
 }
 
-function addDinosToMenu(menu, dinoType) {
+function addDinosToMenu(menu, schema) {
+  const dinoType = schema.nodes.dino;
   // Add a dino-inserting item for each type of dino
   dinos.forEach(name => menu.insertMenu.content.push(new MenuItem({
     title: "Insert " + name,

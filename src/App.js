@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
-import { ExampleView, exampleNodeSpec } from './exampleview';
+import { ExampleView, addExampleToMenu, exampleNodeSpec } from './exampleview';
 import { addDinosToMenu, dinoNodeSpec } from './dinomodule';
 
 const {Schema, DOMParser} = require("prosemirror-model")
@@ -25,7 +25,8 @@ class App extends Component {
 
     // Ask example-setup to build its basic menu
     let menu = buildMenuItems(demoSchema)
-    addDinosToMenu(menu, demoSchema.nodes.dino)
+    addDinosToMenu(menu, demoSchema)
+    addExampleToMenu(menu, demoSchema)
     let content = document.querySelector("#content")
     let startDoc = DOMParser.fromSchema(demoSchema).parse(content)
 
@@ -46,8 +47,8 @@ class App extends Component {
       <div key='menu' id="menu"></div>,
       <div key='content' id="content" style={{"display": "none"}}>
         <h1>howdy all</h1>
-        doop doop doop
-        here is some text
+        doop doop doop<br/>
+        here is some text<br/>
         enjoy the text please!
       </div>
     ]);

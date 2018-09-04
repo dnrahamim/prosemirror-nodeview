@@ -1,3 +1,5 @@
+const {MenuItem} = require("prosemirror-menu")
+
 export class ExampleView {
   constructor(node, view, getPos) {
     // The editor will use this as the node's DOM representation
@@ -15,11 +17,11 @@ export class ExampleView {
 
 const exampleNodeSpec = {
   attrs: { value: { default: 'toot toot tooot' }, bagelvalue: { default: 438 } },
-  inline: false,
+  inline: true,
+  group: "inline",
   draggable: true,
-  selectable: true,
+  selectable: false,
   atom: false,
-  group: 'block',
   toDOM(node) {
     return ['div', { 'data-type': 'example', value: node.attrs.value }, ''];
   },
@@ -32,4 +34,28 @@ const exampleNodeSpec = {
     }
   }]
 }
+
+function insertExample(schemaType) {
+  return function(state, dispatch) {
+    let {$from} = state.selection, index = $from.index()
+    if (!$from.parent.canReplaceWith(index, index, schemaType))
+      return false
+    if (dispatch)
+      dispatch(state.tr.replaceSelectionWith(schemaType.create({value: 'here is a data-type baby'})))
+    return true
+  }
+}
+
+function addExampleToMenu(menu, schema) {
+  const schemaType = schema.nodes.example;
+  // Add a dino-inserting item for each type of dino
+  menu.insertMenu.content.push(new MenuItem({
+    title: "Insert Example",
+    label: "Example",
+    enable(state) { return insertExample(schemaType)(state) },
+    run: insertExample(schemaType)
+  }))
+}
+
 export {exampleNodeSpec};
+export {addExampleToMenu};
