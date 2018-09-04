@@ -6,6 +6,7 @@ export class ExampleView {
     this.dom = document.createElement("input")
     this.dom.type = "text"
     this.dom.value = "bagelcake"
+    this.dom.id = 'bagel'
     this.dom.addEventListener("click", e => {
       console.log("You clicked me!")
       e.preventDefault()
@@ -40,8 +41,12 @@ function insertExample(schemaType) {
     let {$from} = state.selection, index = $from.index()
     if (!$from.parent.canReplaceWith(index, index, schemaType))
       return false
-    if (dispatch)
+    if (dispatch) {
       dispatch(state.tr.replaceSelectionWith(schemaType.create({value: 'here is a data-type baby'})))
+      let bagel = document.getElementById('bagel');
+      bagel.focus();
+      bagel.select();
+    }
     return true
   }
 }
