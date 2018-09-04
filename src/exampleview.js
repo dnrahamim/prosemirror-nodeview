@@ -3,11 +3,11 @@ const {MenuItem} = require("prosemirror-menu")
 export class ExampleView {
   constructor(node, view, getPos) {
     // The editor will use this as the node's DOM representation
-    this.dom = document.createElement("input")
-    this.dom.type = "text"
-    this.dom.value = "bagelcake"
-    this.dom.id = 'bagel'
-    this.dom.addEventListener("click", e => {
+    let dom = document.createElement("span")
+    this.dom = dom
+    node.dom = dom
+    dom.innerHTML = '<input type="text" value="bagelcake" id="bagel"/>'
+    dom.addEventListener("click", e => {
       console.log("You clicked me!")
       e.preventDefault()
     })
@@ -42,10 +42,11 @@ function insertExample(schemaType) {
     if (!$from.parent.canReplaceWith(index, index, schemaType))
       return false
     if (dispatch) {
-      dispatch(state.tr.replaceSelectionWith(schemaType.create({value: 'here is a data-type baby'})))
-      let bagel = document.getElementById('bagel');
-      bagel.focus();
-      bagel.select();
+      let proseNode = schemaType.create({value: 'here is a data-type baby'});
+      dispatch(state.tr.replaceSelectionWith(proseNode))
+      let input = proseNode.dom.querySelector('input')
+      input.focus()
+      input.select()
     }
     return true
   }
