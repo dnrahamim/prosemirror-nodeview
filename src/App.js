@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
-import { ExampleView } from './exampleview';
+import { ExampleView, exampleNodeSpec } from './exampleview';
+import { addDinosToMenu, dinoNodeSpec } from './dinomodule';
 
 const {Schema, DOMParser} = require("prosemirror-model")
 const {EditorView, Decoration, DecorationSet} = require("prosemirror-view")
 const {EditorState, TextSelection, Plugin} = require("prosemirror-state")
 const {schema} = require("prosemirror-schema-basic")
 const {addListNodes} = require("prosemirror-schema-list")
-const {exampleSetup} = require("prosemirror-example-setup")
-
+const {exampleSetup, buildMenuItems} = require("prosemirror-example-setup")
 
 class App extends Component {
 
@@ -17,54 +17,39 @@ class App extends Component {
     const nodes = addListNodes(schema.spec.nodes, "paragraph block*", "block");
     const demoSchema = new Schema({
       nodes: nodes.append({
-        example: {
-          attrs: { value: { default: 'toot toot tooot' }, bagelvalue: { default: 438 } },
-          inline: false,
-          draggable: true,
-          selectable: true,
-          atom: false,
-          group: 'block',
-          toDOM(node) {
-            return ['div', { 'data-type': 'example', value: node.attrs.value }, ''];
-          },
-          parseDOM: [{
-            // you could use my-element as a tag, but we want some additional features that come with the node view
-            // the custom element would then completely take over the node and only communicate through its attributes
-            tag: 'div[data-type=example]',
-            getAttrs(dom) {
-              return {};
-            }
-          }]
-        }
+        example: exampleNodeSpec,
+        dino: dinoNodeSpec
       }),
       marks: schema.spec.marks
     });
 
-    const node = demoSchema.node.bind(demoSchema);
-    const text = demoSchema.text.bind(demoSchema);
-    const example = demoSchema.nodes.example;
-    const paragraph = demoSchema.nodes.paragraph;
-    const heading = demoSchema.nodes.heading;
+    // Ask example-setup to build its basic menu
+    let menu = buildMenuItems(demoSchema)
+    addDinosToMenu(menu, demoSchema.nodes.dino)
+    let content = document.querySelector("#content")
+    let startDoc = DOMParser.fromSchema(demoSchema).parse(content)
 
-    let view = new EditorView(document.querySelector("#menu"), {
+    window.view = new EditorView(document.querySelector("#menu"), {
       state: EditorState.create({
-        doc: node('doc', {}, [
-          heading.create({}, [text('Test document')]),
-          example.create({}, []),
-          paragraph.create({}, [text('Some paragraph to drag after')])
-        ]),
-        plugins: exampleSetup({ schema: demoSchema }),
+        doc: startDoc,
+        // Pass exampleSetup our schema and the menu we created
+        plugins: exampleSetup({schema: demoSchema, menuContent: menu.fullMenu})
       }),
       nodeViews: {
         example: (node, nodeView, getPos) => new ExampleView(node, nodeView, getPos)
       }
-    });
+    })
   }
 
   render() {
     return ([
       <div key='menu' id="menu"></div>,
-      <div key='content' id="content"></div>
+      <div key='content' id="content" style={{"display": "none"}}>
+        <h1>howdy all</h1>
+        doop doop doop
+        here is some text
+        enjoy the text please!
+      </div>
     ]);
   }
 }
