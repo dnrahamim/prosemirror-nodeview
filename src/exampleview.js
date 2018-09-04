@@ -1,15 +1,49 @@
 const {MenuItem} = require("prosemirror-menu")
+const math = require('mathjs')
 
 export class ExampleView {
+
   constructor(node, view, getPos) {
+    let state = {
+      condition: 'open'
+    }
+    this.state = state;
+
     // The editor will use this as the node's DOM representation
     let dom = document.createElement("span")
+    dom.style = 'border-color: blue'
     this.dom = dom
     node.dom = dom
-    dom.innerHTML = '<input type="text" value="bagelcake" id="bagel"/>'
+
+    // Set up the input element
+    let input = document.createElement("input")
+    dom.appendChild(input)
+    input.type = "text"
+    input.placeholder = "Enter expression"
+    input.addEventListener("keydown", e => {
+      if(e.keyCode === 13) {
+        let evaluated = math.eval(input.value);
+        viewer.innerHTML = evaluated
+        input.style = "display: none"
+        viewer.style = ""
+        state.condition = 'closed'
+      }
+    })
+
+    // Set up the view for the evaluated expression
+    let viewer = document.createElement("span")
+    dom.appendChild(viewer)
+    viewer.style = "display: none"
+
     dom.addEventListener("click", e => {
-      console.log("You clicked me!")
-      e.preventDefault()
+      e.preventDefault();
+      if(state.condition === 'closed') {
+        viewer.style = "display: none"
+        input.style = ""
+        input.focus()
+        input.select()
+        state.condition = 'open'
+      }
     })
   }
 
