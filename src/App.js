@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import { ExpressionView, addExpressionToMenu, expressionNodeSpec } from './expression';
 import { addDinosToMenu, dinoNodeSpec } from './dinomodule';
+import { selectionSizePlugin } from './plugins/selectionsize';
+import './App.css'
 
 const {Schema, DOMParser} = require("prosemirror-model")
 const {EditorView, Decoration, DecorationSet} = require("prosemirror-view")
@@ -30,11 +32,12 @@ class App extends Component {
     let content = document.querySelector("#content")
     let startDoc = DOMParser.fromSchema(demoSchema).parse(content)
 
-    window.view = new EditorView(document.querySelector("#menu"), {
+    window.view = new EditorView(document.querySelector("#editor"), {
       state: EditorState.create({
         doc: startDoc,
         // Pass exampleSetup our schema and the menu we created
         plugins: exampleSetup({schema: demoSchema, menuContent: menu.fullMenu})
+                  .concat(selectionSizePlugin)
       }),
       nodeViews: {
         expression: (node, nodeView, getPos) => new ExpressionView(node, nodeView, getPos)
@@ -44,7 +47,7 @@ class App extends Component {
 
   render() {
     return ([
-      <div key='menu' id="menu"></div>,
+      <div key='editor' id="editor"></div>,
       <div key='content' id="content" style={{"display": "none"}}>
         <h1>howdy all</h1>
         doop doop doop<br/>
