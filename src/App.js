@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
-import { ExampleView, addExampleToMenu, exampleNodeSpec } from './exampleview';
+import { ExpressionView, addExpressionToMenu, expressionNodeSpec } from './expression';
 import { addDinosToMenu, dinoNodeSpec } from './dinomodule';
 
 const {Schema, DOMParser} = require("prosemirror-model")
@@ -17,7 +17,7 @@ class App extends Component {
     const nodes = addListNodes(schema.spec.nodes, "paragraph block*", "block");
     const demoSchema = new Schema({
       nodes: nodes.append({
-        example: exampleNodeSpec,
+        expression: expressionNodeSpec,
         dino: dinoNodeSpec
       }),
       marks: schema.spec.marks
@@ -26,7 +26,7 @@ class App extends Component {
     // Ask example-setup to build its basic menu
     let menu = buildMenuItems(demoSchema)
     addDinosToMenu(menu, demoSchema)
-    addExampleToMenu(menu, demoSchema)
+    addExpressionToMenu(menu, demoSchema)
     let content = document.querySelector("#content")
     let startDoc = DOMParser.fromSchema(demoSchema).parse(content)
 
@@ -37,7 +37,7 @@ class App extends Component {
         plugins: exampleSetup({schema: demoSchema, menuContent: menu.fullMenu})
       }),
       nodeViews: {
-        example: (node, nodeView, getPos) => new ExampleView(node, nodeView, getPos)
+        expression: (node, nodeView, getPos) => new ExpressionView(node, nodeView, getPos)
       }
     })
   }
