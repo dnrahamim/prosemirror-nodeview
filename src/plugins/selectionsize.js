@@ -29,8 +29,6 @@ class SelectionSizeTooltip {
       return
     }
 
-    debugger;
-
     // Otherwise, reposition it and update its content
     this.tooltip.style.display = ""
     let {from, to} = state.selection
