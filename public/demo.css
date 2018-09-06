@@ -3,6 +3,10 @@ body {
   margin: 0 1em 2em;
 }
 
+:focus {
+  outline: 0;
+}
+
 textarea {
   width: 100%;
   border: 1px solid silver;
