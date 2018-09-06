@@ -1,61 +1,22 @@
-import {Transform} from 'prosemirror-transform'
-
 const {MenuItem} = require("prosemirror-menu")
 const math = require('mathjs')
 
 export class ExpressionView {
 
   constructor(node, view, getPos) {
-    let state = {
-      condition: 'open'
-    }
-    this.state = state;
-    this.getPos = getPos;
+    this.node = node
+    this.view = view
+    this.getPos = getPos
+    // this.update = this.update.bind(this)
+    this.handleClick = this.handleClick.bind(this)
+    this.handleKeyDown = this.handleKeyDown.bind(this)
 
     // The editor will use this as the node's DOM representation
     let dom = document.createElement("span")
     dom.style = 'border-color: blue'
-    this.dom = dom
-    node.dom = dom
+    this.node.dom = dom
 
-    // Set up the input element
-    let input = document.createElement("input")
-    dom.appendChild(input)
-    input.type = "text"
-    input.placeholder = "Enter expression"
-    input.addEventListener("keydown", e => {
-      if(e.keyCode === 13) {
-        let evaluated = math.eval(input.value);
-        viewer.innerHTML = evaluated
-        input.style.display = "none"
-        viewer.style.display = ""
-        state.condition = 'closed'
-
-        view.dispatch(
-          view.state.tr
-            .setNodeMarkup(getPos(), null, {condition: 'closed'})
-            .setMeta("bagelcakeMeta", true))
-        // let {myState} = view.state.applyTransaction(tr)
-        // view.updateState(myState)
-      }
-    })
-
-    // Set up the view for the evaluated expression
-    let viewer = document.createElement("span")
-    dom.appendChild(viewer)
-    viewer.style.display = "none"
-    viewer.style.color = "blue"
-
-    dom.addEventListener("click", e => {
-      e.preventDefault();
-      if(state.condition === 'closed') {
-        viewer.style.display = "none"
-        input.style.display = ""
-        input.focus()
-        input.select()
-        state.condition = 'open'
-      }
-    })
+    this.buildDom()
   }
 
   stopEvent() { return true }
@@ -63,11 +24,52 @@ export class ExpressionView {
   update() {
     console.log('expression update')
   }
+
+  buildDom(dom) {
+    if(this.node.attrs.condition === 'open') {
+      // Set up the input element
+      let input = document.createElement("input")
+      dom.appendChild(input)
+      input.type = "text"
+      input.value = this.node.attrs.value
+      input.placeholder = "Enter expression"
+      input.focus()
+      input.select()
+      input.addEventListener("keydown", this.handleKeyDown)
+    } else {
+      // Set up the view for the evaluated expression
+      let viewer = document.createElement("span")
+      dom.appendChild(viewer)
+
+      let evaluated = math.eval(this.node.attrs.value);
+      viewer.innerHTML = evaluated
+      viewer.style.color = "blue"
+  
+      dom.addEventListener("click", this.handleClick)
+    }
+  }
+
+  handleClick(e) {
+    e.preventDefault();
+    this.view.dispatch(
+      this.view.state.tr
+        .setNodeMarkup(this.getPos(), null, {condition: 'open'})
+    )
+  }
+
+  handleKeyDown(e) {
+    if(e.keyCode === 13) {
+      this.view.dispatch(
+        this.view.state.tr
+          .setNodeMarkup(this.getPos(), null, {condition: 'closed'})
+      )
+    }
+  }
 }
 
 const expressionNodeSpec = {
   attrs: { 
-    value: { default: 'toot toot tooot' },
+    value: { default: '' },
     condition: { default: 'open' } 
   },
   inline: true,
@@ -92,7 +94,7 @@ function insertExpression(schemaType) {
     if (!$from.parent.canReplaceWith(index, index, schemaType))
       return false
     if (dispatch) {
-      let proseNode = schemaType.create({value: '(6*7*9) ft in inches'});
+      let proseNode = schemaType.create({value: ''});
       dispatch(state.tr.replaceSelectionWith(proseNode))
       let input = proseNode.dom.querySelector('input')
       input.focus()
