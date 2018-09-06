@@ -1,3 +1,5 @@
+import './dino.css'
+
 const {MenuItem} = require("prosemirror-menu")
 
 // The supported types of dinosaurs.

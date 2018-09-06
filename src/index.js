@@ -1,10 +1,9 @@
 import registerServiceWorker from './registerServiceWorker';
-import { ExpressionView, addExpressionToMenu, expressionNodeSpec } from './expression';
-import { addDinosToMenu, dinoNodeSpec } from './dinomodule';
+import { ExpressionView, addExpressionToMenu, expressionNodeSpec } from './nodes/expression';
+import { addDinosToMenu, dinoNodeSpec } from './nodes/dino';
 import { selectionSizePlugin } from './plugins/selectionsize';
 import { footnoteSpec, FootnoteView, addFootnoteToMenu } from './nodes/footnote';
 import applyDevTools from "prosemirror-dev-tools";
-import './App.css'
 
 const { Schema, DOMParser } = require("prosemirror-model")
 const { EditorView } = require("prosemirror-view")
