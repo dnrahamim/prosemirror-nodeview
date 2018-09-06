@@ -1,3 +1,5 @@
+import {NodeSelection} from 'prosemirror-state'
+
 const {MenuItem} = require("prosemirror-menu")
 const math = require('mathjs')
 
@@ -16,8 +18,13 @@ export class ExpressionView {
 
   stopEvent() { return true }
 
-  update() {
-    console.log('expression update')
+  selectNode(arg) {
+    if(this.input) {
+      this.input.focus()
+      this.input.select()
+    } else {
+      this.dom.className = 'ProseMirror-selectednode';
+    }
   }
 
   buildDom() {
@@ -35,8 +42,6 @@ export class ExpressionView {
       input.type = "text"
       input.value = this.node.attrs.value
       input.placeholder = "Enter expression"
-      input.focus()
-      input.select()
       input.addEventListener("keydown", this.handleKeyDown)
     } else {
       // Set up the view for the evaluated expression
@@ -53,12 +58,15 @@ export class ExpressionView {
 
   handleClick(e) {
     e.preventDefault();
+    let resolvedPos = this.view.state.doc.resolve(this.getPos())
+    let nodeSelection = new NodeSelection(resolvedPos)
     this.view.dispatch(
       this.view.state.tr
         .setNodeMarkup(this.getPos(), null, {
           condition: 'open',
           value: this.node.attrs.value
         })
+        .setSelection(nodeSelection)
     )
   }
 
@@ -102,9 +110,9 @@ function insertExpression(schemaType) {
     if (!$from.parent.canReplaceWith(index, index, schemaType))
       return false
     if (dispatch) {
-      let proseNode = schemaType.create({value: ''});
-      dispatch(state.tr.replaceSelectionWith(proseNode))
-      let input = proseNode.dom.querySelector('input')
+      let expressionNode = schemaType.create({value: ''});
+      dispatch(state.tr.replaceSelectionWith(expressionNode))
+      let input = expressionNode.dom.querySelector('input')
       input.focus()
       input.select()
     }
