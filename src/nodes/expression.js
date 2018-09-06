@@ -11,11 +11,6 @@ export class ExpressionView {
     this.handleClick = this.handleClick.bind(this)
     this.handleKeyDown = this.handleKeyDown.bind(this)
 
-    // The editor will use this as the node's DOM representation
-    let dom = document.createElement("span")
-    dom.style = 'border-color: blue'
-    this.node.dom = dom
-
     this.buildDom()
   }
 
@@ -25,10 +20,17 @@ export class ExpressionView {
     console.log('expression update')
   }
 
-  buildDom(dom) {
+  buildDom() {
+    // The editor will use this as the node's DOM representation
+    let dom = document.createElement("span")
+    this.dom = dom
+    dom.style = 'border-color: blue'
+    this.node.dom = dom
+
     if(this.node.attrs.condition === 'open') {
       // Set up the input element
       let input = document.createElement("input")
+      this.input = input
       dom.appendChild(input)
       input.type = "text"
       input.value = this.node.attrs.value
@@ -53,7 +55,10 @@ export class ExpressionView {
     e.preventDefault();
     this.view.dispatch(
       this.view.state.tr
-        .setNodeMarkup(this.getPos(), null, {condition: 'open'})
+        .setNodeMarkup(this.getPos(), null, {
+          condition: 'open',
+          value: this.node.attrs.value
+        })
     )
   }
 
@@ -61,7 +66,10 @@ export class ExpressionView {
     if(e.keyCode === 13) {
       this.view.dispatch(
         this.view.state.tr
-          .setNodeMarkup(this.getPos(), null, {condition: 'closed'})
+          .setNodeMarkup(this.getPos(), null, {
+            condition: 'closed',
+            value: this.input.value
+          })
       )
     }
   }
