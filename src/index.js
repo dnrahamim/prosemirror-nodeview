@@ -3,6 +3,7 @@ import { ExpressionView, addExpressionToMenu, expressionNodeSpec } from './expre
 import { addDinosToMenu, dinoNodeSpec } from './dinomodule';
 import { selectionSizePlugin } from './plugins/selectionsize';
 import { footnoteSpec, FootnoteView, addFootnoteToMenu } from './nodes/footnote';
+import applyDevTools from "prosemirror-dev-tools";
 import './App.css'
 
 const { Schema, DOMParser } = require("prosemirror-model")
@@ -31,7 +32,7 @@ addFootnoteToMenu(menu, demoSchema)
 let content = document.querySelector("#content")
 let startDoc = DOMParser.fromSchema(demoSchema).parse(content)
 
-window.view = new EditorView(document.querySelector("#editor"), {
+let view = new EditorView(document.querySelector("#editor"), {
   state: EditorState.create({
     doc: startDoc,
     // Pass exampleSetup our schema and the menu we created
@@ -43,5 +44,6 @@ window.view = new EditorView(document.querySelector("#editor"), {
     footnote: function (node, view, getPos) { return new FootnoteView(node, view, getPos) }
   }
 })
+applyDevTools(view);
 
 registerServiceWorker();
