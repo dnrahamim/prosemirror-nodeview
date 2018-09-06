@@ -1,3 +1,5 @@
+import {Transform} from 'prosemirror-transform'
+
 const {MenuItem} = require("prosemirror-menu")
 const math = require('mathjs')
 
@@ -27,6 +29,15 @@ export class ExpressionView {
         input.style.display = "none"
         viewer.style.display = ""
         state.condition = 'closed'
+
+        console.log(view.state)
+        debugger;
+        view.dispatch(
+          view.state.tr
+            .delete(2, 4)
+            .setMeta("bagelcakeMeta", true))
+        // let {myState} = view.state.applyTransaction(tr)
+        // view.updateState(myState)
       }
     })
 
@@ -49,15 +60,22 @@ export class ExpressionView {
   }
 
   stopEvent() { return true }
+
+  update() {
+    console.log('expression update')
+  }
 }
 
 const expressionNodeSpec = {
-  attrs: { value: { default: 'toot toot tooot' }, bagelvalue: { default: 438 } },
+  attrs: { 
+    value: { default: 'toot toot tooot' },
+    condition: { default: 'open' } 
+  },
   inline: true,
   group: "inline",
   draggable: true,
   toDOM(node) {
-    return ['div', { 'data-type': 'expression', value: node.attrs.value }, ''];
+    return ['div', { 'data-type': 'expression', 'value': node.attrs.value }, ''];
   },
   parseDOM: [{
     // you could use my-element as a tag, but we want some additional features that come with the node view
@@ -75,7 +93,7 @@ function insertExpression(schemaType) {
     if (!$from.parent.canReplaceWith(index, index, schemaType))
       return false
     if (dispatch) {
-      let proseNode = schemaType.create({value: 'here is a data-type baby'});
+      let proseNode = schemaType.create({value: '(6*7*9) ft in inches'});
       dispatch(state.tr.replaceSelectionWith(proseNode))
       let input = proseNode.dom.querySelector('input')
       input.focus()
