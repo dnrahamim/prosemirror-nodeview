@@ -10,6 +10,7 @@ export class ExpressionView {
       condition: 'open'
     }
     this.state = state;
+    this.getPos = getPos;
 
     // The editor will use this as the node's DOM representation
     let dom = document.createElement("span")
@@ -30,11 +31,9 @@ export class ExpressionView {
         viewer.style.display = ""
         state.condition = 'closed'
 
-        console.log(view.state)
-        debugger;
         view.dispatch(
           view.state.tr
-            .delete(2, 4)
+            .setNodeMarkup(getPos(), null, {condition: 'closed'})
             .setMeta("bagelcakeMeta", true))
         // let {myState} = view.state.applyTransaction(tr)
         // view.updateState(myState)
