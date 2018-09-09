@@ -1,5 +1,6 @@
 import registerServiceWorker from './registerServiceWorker';
 import { ExpressionView, addExpressionToMenu, expressionNodeSpec } from './nodes/expression';
+import { RangeView, addRangeToMenu, rangeNodeSpec } from './nodes/range';
 import { addDinosToMenu, dinoNodeSpec } from './nodes/dino';
 import { selectionSizePlugin } from './plugins/selectionsize';
 import { footnoteSpec, FootnoteView, addFootnoteToMenu } from './nodes/footnote';
@@ -12,10 +13,10 @@ const { schema } = require("prosemirror-schema-basic")
 const { addListNodes } = require("prosemirror-schema-list")
 const { exampleSetup, buildMenuItems } = require("prosemirror-example-setup")
 
-
 const nodes = addListNodes(schema.spec.nodes, "paragraph block*", "block");
 const demoSchema = new Schema({
   nodes: nodes.append({
+    range: rangeNodeSpec,
     expression: expressionNodeSpec,
     dino: dinoNodeSpec,
     footnote: footnoteSpec
@@ -26,6 +27,7 @@ const demoSchema = new Schema({
 // Ask example-setup to build its basic menu
 let menu = buildMenuItems(demoSchema)
 addDinosToMenu(menu, demoSchema)
+addRangeToMenu(menu, demoSchema)
 addExpressionToMenu(menu, demoSchema)
 addFootnoteToMenu(menu, demoSchema)
 let content = document.querySelector("#content")
@@ -39,6 +41,7 @@ let view = new EditorView(document.querySelector("#editor"), {
       // .concat(selectionSizePlugin)
   }),
   nodeViews: {
+    range: function (node, nodeView, getPos) { return new RangeView(node, nodeView, getPos) },
     expression: function (node, nodeView, getPos) { return new ExpressionView(node, nodeView, getPos) },
     footnote: function (node, view, getPos) { return new FootnoteView(node, view, getPos) }
   }
