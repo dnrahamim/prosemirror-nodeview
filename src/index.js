@@ -24,6 +24,41 @@ const demoSchema = new Schema({
   marks: schema.spec.marks
 });
 
+
+
+// use this later
+let expressionStore = [];
+let fieldCounter = 0;
+function registerExpression(expressionNode) {
+  expressionStore.push(expressionNode)
+}
+function updateExpressions() {
+  for(let i = 0; i < expressionStore.length; i++) {
+    let expressionNode = expressionStore[i];
+    // expressionNode.update()
+  }
+}
+function registerField() {
+  const id = idGen();
+  fieldCounter++;
+  return id;
+}
+function idGen() {
+  return "field" + fieldCounter;
+}
+
+
+const nodeViewSetup = {
+  range: function (node, nodeView, getPos) { return new RangeView(node, nodeView, getPos) },
+  expression: function (node, nodeView, getPos) {
+    const myExpression = new ExpressionView(node, nodeView, getPos)
+    registerExpression(myExpression);
+    return myExpression;
+  },
+  footnote: function (node, view, getPos) { return new FootnoteView(node, view, getPos) }
+}
+
+
 // Ask example-setup to build its basic menu
 let menu = buildMenuItems(demoSchema)
 addDinosToMenu(menu, demoSchema)
