@@ -2,11 +2,13 @@ const {MenuItem} = require("prosemirror-menu")
 
 export class RangeView {
 
-  constructor(node, view, getPos) {
+  constructor(node, view, getPos, updateField) {
     this.node = node
     this.view = view
     this.getPos = getPos
+    this.updateField = updateField;
     this.handleMouseUp = this.handleMouseUp.bind(this)
+    this.handleInputChange = this.handleInputChange.bind(this)
 
     this.buildDom()
   }
@@ -25,21 +27,32 @@ export class RangeView {
     range.type="range"
     range.min="1"
     range.max="100"
-    range.value="50"
+    range.value = this.node.attrs.value || '50'
+    range.oninput = this.handleInputChange;
     dom.appendChild(range)
     range.addEventListener("mouseup", this.handleMouseUp)
   }
 
+  handleInputChange(e) {
+    this.updateField(this.id, this.range.value)
+  }
+
   handleMouseUp(e) {
     e.preventDefault();
-    console.log('mouseup')
+    this.view.dispatch(
+      this.view.state.tr
+        .setNodeMarkup(this.getPos(), null, {
+          value: this.range.value
+        })
+    )
   }
+
+
 }
 
 const rangeNodeSpec = {
   attrs: { 
     value: { default: '' },
-    condition: { default: 'open' } 
   },
   inline: true,
   group: "inline",

@@ -28,20 +28,30 @@ const demoSchema = new Schema({
 
 // use this later
 let expressionStore = [];
+let fieldStore = {};
 let fieldCounter = 0;
-function registerExpression(expressionNode) {
-  expressionStore.push(expressionNode)
+function registerExpressionView(expressionView) {
+  expressionStore.push(expressionView)
 }
 function updateExpressions() {
-  for(let i = 0; i < expressionStore.length; i++) {
+  for (let i = 0; i < expressionStore.length; i++) {
     let expressionNode = expressionStore[i];
     // expressionNode.update()
   }
 }
-function registerField() {
+function registerField(fieldValue) {
   const id = idGen();
+  fieldStore[id] = fieldValue;
   fieldCounter++;
   return id;
+}
+/*
+ * Whenever any field is updated
+ * update all [relevant] expressions
+ */
+function updateField(id, value) {
+  fieldStore[id] = value;
+  updateExpressions();
 }
 function idGen() {
   return "field" + fieldCounter;
@@ -49,11 +59,15 @@ function idGen() {
 
 
 const nodeViewSetup = {
-  range: function (node, nodeView, getPos) { return new RangeView(node, nodeView, getPos) },
+  range: function (node, nodeView, getPos) {
+    const myRangeView = new RangeView(node, nodeView, getPos, updateField)
+    myRangeView.id = registerField(node.attrs.value)
+    return myRangeView
+  },
   expression: function (node, nodeView, getPos) {
-    const myExpression = new ExpressionView(node, nodeView, getPos)
-    registerExpression(myExpression);
-    return myExpression;
+    const myExpressionView = new ExpressionView(node, nodeView, getPos)
+    registerExpressionView(myExpressionView)
+    return myExpressionView
   },
   footnote: function (node, view, getPos) { return new FootnoteView(node, view, getPos) }
 }
@@ -75,11 +89,7 @@ let view = new EditorView(document.querySelector("#editor"), {
     plugins: exampleSetup({ schema: demoSchema, menuContent: menu.fullMenu })
       // .concat(selectionSizePlugin)
   }),
-  nodeViews: {
-    range: function (node, nodeView, getPos) { return new RangeView(node, nodeView, getPos) },
-    expression: function (node, nodeView, getPos) { return new ExpressionView(node, nodeView, getPos) },
-    footnote: function (node, view, getPos) { return new FootnoteView(node, view, getPos) }
-  }
+  nodeViews: nodeViewSetup
 })
 applyDevTools(view);
 
