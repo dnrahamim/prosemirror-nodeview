@@ -5,11 +5,11 @@ const math = require('mathjs')
 
 export class ExpressionView {
 
-  constructor(node, view, getPos) {
+  constructor(node, view, getPos, parseFields) {
     this.node = node
     this.view = view
     this.getPos = getPos
-    // this.update = this.update.bind(this)
+    this.parseFields = parseFields;
     this.handleClick = this.handleClick.bind(this)
     this.handleKeyDown = this.handleKeyDown.bind(this)
 
@@ -48,7 +48,9 @@ export class ExpressionView {
       let viewer = document.createElement("span")
       dom.appendChild(viewer)
 
-      let evaluated = math.eval(this.node.attrs.value);
+      const initialVal = this.node.attrs.value
+      let parsedVal = this.parseFields(initialVal)
+      let evaluated = math.eval(parsedVal);
       viewer.innerHTML = evaluated
       viewer.style.color = "blue"
   

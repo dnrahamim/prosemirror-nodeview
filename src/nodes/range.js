@@ -2,10 +2,11 @@ const {MenuItem} = require("prosemirror-menu")
 
 export class RangeView {
 
-  constructor(node, view, getPos, updateField) {
+  constructor(node, view, getPos, registerField, updateField) {
     this.node = node
     this.view = view
     this.getPos = getPos
+    this.id = registerField(node.attrs.value)
     this.updateField = updateField;
     this.handleMouseUp = this.handleMouseUp.bind(this)
     this.handleInputChange = this.handleInputChange.bind(this)
@@ -28,6 +29,7 @@ export class RangeView {
     range.min="1"
     range.max="100"
     range.value = this.node.attrs.value || '50'
+    this.updateField(this.id, range.value)
     range.oninput = this.handleInputChange;
     dom.appendChild(range)
     range.addEventListener("mouseup", this.handleMouseUp)

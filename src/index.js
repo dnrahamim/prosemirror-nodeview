@@ -50,22 +50,36 @@ function registerField(fieldValue) {
  * update all [relevant] expressions
  */
 function updateField(id, value) {
+  console.log('bagel')
   fieldStore[id] = value;
   updateExpressions();
 }
 function idGen() {
   return "field" + fieldCounter;
 }
+function parseFields(stringData) {
+  debugger;
+  const regex = /#(\S*)/g
+  const found = stringData.match(regex) || []
+  let result = stringData.substr(0)
+  for(let i = 0; i < found.length; i++) {
+    const id = found[i].substr(1);
+    if(fieldStore.hasOwnProperty(id)) {
+      const val = fieldStore[id];
+      result = result.replace(found[i], val)
+    }
+  }
+  return result;
+}
 
 
 const nodeViewSetup = {
   range: function (node, nodeView, getPos) {
-    const myRangeView = new RangeView(node, nodeView, getPos, updateField)
-    myRangeView.id = registerField(node.attrs.value)
+    let myRangeView = new RangeView(node, nodeView, getPos, registerField, updateField)
     return myRangeView
   },
   expression: function (node, nodeView, getPos) {
-    const myExpressionView = new ExpressionView(node, nodeView, getPos)
+    const myExpressionView = new ExpressionView(node, nodeView, getPos, parseFields)
     registerExpressionView(myExpressionView)
     return myExpressionView
   },
