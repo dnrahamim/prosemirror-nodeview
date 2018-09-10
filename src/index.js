@@ -36,6 +36,7 @@ function registerExpressionView(expressionView) {
   expressionStore[id] = expressionView
   return id;
 }
+//TODO: perhaps just loop through all nodeviews and check if expression type?
 function destroyExpressionView(id) {
   delete expressionStore[id]
 }
@@ -62,12 +63,17 @@ function updateField(id, value) {
 function idGen() {
   return "field" + fieldCounter;
 }
+//TODO: incorporate this string prototype addition gracefully
+String.prototype.replaceAll = function(search, replacement) {
+  var target = this;
+  return target.split(search).join(replacement);
+};
 function parseFields(stringData) {
   let result = stringData.substr(0)
   //TODO: make this more performant (very very low priority)
   for(let fieldID in fieldStore) {
     const val = fieldStore[fieldID];
-    result = result.replace('#' + fieldID, val)
+    result = result.replaceAll('#' + fieldID, val)
   }
   return result;
 }
