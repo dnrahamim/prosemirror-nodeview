@@ -100,7 +100,8 @@ export class ExpressionView {
 const expressionNodeSpec = {
   attrs: { 
     value: { default: '' },
-    condition: { default: 'open' } 
+    condition: { default: 'open' } ,
+    id: { default: '' },
   },
   inline: true,
   group: "inline",

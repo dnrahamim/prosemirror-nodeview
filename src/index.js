@@ -63,15 +63,11 @@ function idGen() {
   return "field" + fieldCounter;
 }
 function parseFields(stringData) {
-  const regex = /#(\S*)/g
-  const found = stringData.match(regex) || []
   let result = stringData.substr(0)
-  for(let i = 0; i < found.length; i++) {
-    const id = found[i].substr(1);
-    if(fieldStore.hasOwnProperty(id)) {
-      const val = fieldStore[id];
-      result = result.replace(found[i], val)
-    }
+  //TODO: make this more performant (very very low priority)
+  for(let fieldID in fieldStore) {
+    const val = fieldStore[fieldID];
+    result = result.replace('#' + fieldID, val)
   }
   return result;
 }
