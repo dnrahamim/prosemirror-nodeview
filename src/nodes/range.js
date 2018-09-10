@@ -6,7 +6,6 @@ export class RangeView {
     this.node = node
     this.view = view
     this.getPos = getPos
-    this.id = registerField(node.attrs.value)
     this.updateField = updateField;
     this.handleMouseUp = this.handleMouseUp.bind(this)
     this.handleInputChange = this.handleInputChange.bind(this)
@@ -29,14 +28,14 @@ export class RangeView {
     range.min="1"
     range.max="100"
     range.value = this.node.attrs.value || '50'
-    this.updateField(this.id, range.value)
+    this.updateField(this.node.attrs.id, range.value)
     range.oninput = this.handleInputChange;
     dom.appendChild(range)
     range.addEventListener("mouseup", this.handleMouseUp)
   }
 
   handleInputChange(e) {
-    this.updateField(this.id, this.range.value)
+    this.updateField(this.node.attrs.id, this.range.value)
   }
 
   handleMouseUp(e) {
@@ -44,7 +43,8 @@ export class RangeView {
     this.view.dispatch(
       this.view.state.tr
         .setNodeMarkup(this.getPos(), null, {
-          value: this.range.value
+          value: this.range.value,
+          id: this.node.attrs.id
         })
     )
   }
@@ -55,6 +55,7 @@ export class RangeView {
 const rangeNodeSpec = {
   attrs: { 
     value: { default: '' },
+    id: { default: '' }
   },
   inline: true,
   group: "inline",
@@ -72,27 +73,31 @@ const rangeNodeSpec = {
   }]
 }
 
-function insertRange(schemaType) {
+function insertRange(schemaType, registerField) {
   return function(state, dispatch) {
     let {$from} = state.selection, index = $from.index()
     if (!$from.parent.canReplaceWith(index, index, schemaType))
       return false
     if (dispatch) {
-      let rangeNode = schemaType.create({value: ''});
+      let value = ''
+      let rangeNode = schemaType.create({
+        value: value,
+        id: registerField(value)
+      });
       dispatch(state.tr.replaceSelectionWith(rangeNode))
     }
     return true
   }
 }
 
-function addRangeToMenu(menu, schema) {
+function addRangeToMenu(menu, schema, registerField) {
   const schemaType = schema.nodes.range;
   // Add a dino-inserting item for each type of dino
   menu.insertMenu.content.push(new MenuItem({
     title: "Insert Range",
     label: "Range",
-    enable(state) { return insertRange(schemaType)(state) },
-    run: insertRange(schemaType)
+    enable(state) { return insertRange(schemaType, registerField)(state) },
+    run: insertRange(schemaType, registerField)
   }))
 }
 

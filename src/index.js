@@ -12,6 +12,7 @@ const { EditorState } = require("prosemirror-state")
 const { schema } = require("prosemirror-schema-basic")
 const { addListNodes } = require("prosemirror-schema-list")
 const { exampleSetup, buildMenuItems } = require("prosemirror-example-setup")
+const uuid = require('uuid/v1');
 
 const nodes = addListNodes(schema.spec.nodes, "paragraph block*", "block");
 const demoSchema = new Schema({
@@ -27,16 +28,21 @@ const demoSchema = new Schema({
 
 
 // use this later
-let expressionStore = [];
+let expressionStore = {};
 let fieldStore = {};
 let fieldCounter = 0;
 function registerExpressionView(expressionView) {
-  expressionStore.push(expressionView)
+  const id = uuid();
+  expressionStore[id] = expressionView
+  return id;
+}
+function destroyExpressionView(id) {
+  delete expressionStore[id]
 }
 function updateExpressions() {
-  for (let i = 0; i < expressionStore.length; i++) {
-    let expressionNode = expressionStore[i];
-    // expressionNode.update()
+  for (let id in expressionStore) {
+    let expressionView = expressionStore[id];
+    expressionView.replaceSelf()
   }
 }
 function registerField(fieldValue) {
@@ -50,7 +56,6 @@ function registerField(fieldValue) {
  * update all [relevant] expressions
  */
 function updateField(id, value) {
-  console.log('bagel')
   fieldStore[id] = value;
   updateExpressions();
 }
@@ -58,7 +63,6 @@ function idGen() {
   return "field" + fieldCounter;
 }
 function parseFields(stringData) {
-  debugger;
   const regex = /#(\S*)/g
   const found = stringData.match(regex) || []
   let result = stringData.substr(0)
@@ -75,13 +79,10 @@ function parseFields(stringData) {
 
 const nodeViewSetup = {
   range: function (node, nodeView, getPos) {
-    let myRangeView = new RangeView(node, nodeView, getPos, registerField, updateField)
-    return myRangeView
+    return new RangeView(node, nodeView, getPos, registerField, updateField)
   },
   expression: function (node, nodeView, getPos) {
-    const myExpressionView = new ExpressionView(node, nodeView, getPos, parseFields)
-    registerExpressionView(myExpressionView)
-    return myExpressionView
+    return new ExpressionView(node, nodeView, getPos, registerExpressionView, destroyExpressionView, parseFields)
   },
   footnote: function (node, view, getPos) { return new FootnoteView(node, view, getPos) }
 }
@@ -90,7 +91,7 @@ const nodeViewSetup = {
 // Ask example-setup to build its basic menu
 let menu = buildMenuItems(demoSchema)
 addDinosToMenu(menu, demoSchema)
-addRangeToMenu(menu, demoSchema)
+addRangeToMenu(menu, demoSchema, registerField)
 addExpressionToMenu(menu, demoSchema)
 addFootnoteToMenu(menu, demoSchema)
 let content = document.querySelector("#content")

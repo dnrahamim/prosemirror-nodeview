@@ -5,15 +5,21 @@ const math = require('mathjs')
 
 export class ExpressionView {
 
-  constructor(node, view, getPos, parseFields) {
+  constructor(node, view, getPos, registerExpressionView, destroyExpressionView, parseFields) {
     this.node = node
     this.view = view
     this.getPos = getPos
+    this.id = registerExpressionView(this)
+    this.destroyExpressionView = destroyExpressionView;
     this.parseFields = parseFields;
     this.handleClick = this.handleClick.bind(this)
     this.handleKeyDown = this.handleKeyDown.bind(this)
 
-    this.buildDom()
+    // The editor will use this as the node's DOM representation
+    let dom = document.createElement("span")
+    this.dom = dom
+    this.node.dom = dom
+    this.buildInnerDom(dom)
   }
 
   stopEvent() { return true }
@@ -27,13 +33,7 @@ export class ExpressionView {
     }
   }
 
-  buildDom() {
-    // The editor will use this as the node's DOM representation
-    let dom = document.createElement("span")
-    this.dom = dom
-    dom.style = 'border-color: blue'
-    this.node.dom = dom
-
+  buildInnerDom(dom) {
     if(this.node.attrs.condition === 'open') {
       // Set up the input element
       let input = document.createElement("input")
@@ -56,6 +56,18 @@ export class ExpressionView {
   
       dom.addEventListener("click", this.handleClick)
     }
+  }
+
+  replaceSelf() {
+    // first, destroy children of this.dom
+    while (this.dom.firstChild) {
+      this.dom.removeChild(this.dom.firstChild);
+    }
+    this.buildInnerDom(this.dom)
+  }
+
+  destroy() {
+    this.destroyExpressionView(this.id)
   }
 
   handleClick(e) {
