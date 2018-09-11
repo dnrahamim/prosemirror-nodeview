@@ -1,5 +1,4 @@
 .tern-port
-/node_modules
 /model
 /transform
 /state
@@ -24,4 +23,23 @@
 /notes.txt
 /yarn.lock
 /bin/.pm-dev.pid
+
+# dependencies
+node_modules
+
+# testing
+coverage
+
+# production
+build
+main.css
+
+# misc
 .DS_Store
+.env
+.vscode
+
+npm-debug.log
+.idea
+
+*.log
