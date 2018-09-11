@@ -2,11 +2,11 @@ const {MenuItem} = require("prosemirror-menu")
 
 export class RangeView {
 
-  constructor(node, view, getPos, registerField, updateField) {
+  constructor(node, view, getPos, fieldManager) {
     this.node = node
     this.view = view
     this.getPos = getPos
-    this.updateField = updateField;
+    this.fieldManager = fieldManager;
     this.handleMouseUp = this.handleMouseUp.bind(this)
     this.handleInputChange = this.handleInputChange.bind(this)
 
@@ -28,14 +28,14 @@ export class RangeView {
     range.min="1"
     range.max="100"
     range.value = this.node.attrs.value || '50'
-    this.updateField(this.node.attrs.id, range.value)
+    this.fieldManager.updateField(this.node.attrs.id, range.value)
     range.oninput = this.handleInputChange;
     dom.appendChild(range)
     range.addEventListener("mouseup", this.handleMouseUp)
   }
 
   handleInputChange(e) {
-    this.updateField(this.node.attrs.id, this.range.value)
+    this.fieldManager.updateField(this.node.attrs.id, this.range.value)
   }
 
   handleMouseUp(e) {
@@ -73,7 +73,7 @@ const rangeNodeSpec = {
   }]
 }
 
-function insertRange(schemaType, registerField) {
+function insertRange(schemaType, fieldManager) {
   return function(state, dispatch) {
     let {$from} = state.selection, index = $from.index()
     if (!$from.parent.canReplaceWith(index, index, schemaType))
@@ -82,7 +82,7 @@ function insertRange(schemaType, registerField) {
       let value = ''
       let rangeNode = schemaType.create({
         value: value,
-        id: registerField(value)
+        id: fieldManager.registerField(value)
       });
       dispatch(state.tr.replaceSelectionWith(rangeNode))
     }
@@ -90,14 +90,14 @@ function insertRange(schemaType, registerField) {
   }
 }
 
-function addRangeToMenu(menu, schema, registerField) {
+function addRangeToMenu(menu, schema, fieldManager) {
   const schemaType = schema.nodes.range;
   // Add a dino-inserting item for each type of dino
   menu.insertMenu.content.push(new MenuItem({
     title: "Insert Range",
     label: "Range",
-    enable(state) { return insertRange(schemaType, registerField)(state) },
-    run: insertRange(schemaType, registerField)
+    enable(state) { return insertRange(schemaType, fieldManager)(state) },
+    run: insertRange(schemaType, fieldManager)
   }))
 }
 

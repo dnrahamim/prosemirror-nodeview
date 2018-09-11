@@ -5,17 +5,16 @@ const math = require('mathjs')
 
 export class ExpressionView {
 
-  constructor(node, view, getPos, registerExpressionView, destroyExpressionView, parseFields) {
+  constructor(node, view, getPos, fieldManager) {
     this.node = node
     this.view = view
     this.getPos = getPos
-    this.id = registerExpressionView(this)
-    this.destroyExpressionView = destroyExpressionView;
-    this.parseFields = parseFields;
+    this.id = fieldManager.registerExpressionView(this)
+    this.fieldManager = fieldManager;
     this.handleClick = this.handleClick.bind(this)
     this.handleKeyDown = this.handleKeyDown.bind(this)
 
-    // The editor will use this as the node's DOM representation
+    // The editor wil```````````````````l use this as the node's DOM representation
     let dom = document.createElement("span")
     this.dom = dom
     this.node.dom = dom
@@ -49,7 +48,7 @@ export class ExpressionView {
       dom.appendChild(viewer)
 
       const initialVal = this.node.attrs.value
-      let parsedVal = this.parseFields(initialVal)
+      let parsedVal = this.fieldManager.parseFields(initialVal)
       let evaluated = math.eval(parsedVal);
       viewer.innerHTML = evaluated
       viewer.style.color = "blue"
@@ -58,7 +57,7 @@ export class ExpressionView {
     }
   }
 
-  replaceSelf() {
+  rerenderSelf() {
     // first, destroy children of this.dom
     while (this.dom.firstChild) {
       this.dom.removeChild(this.dom.firstChild);
@@ -67,7 +66,7 @@ export class ExpressionView {
   }
 
   destroy() {
-    this.destroyExpressionView(this.id)
+    this.fieldManager.destroyExpressionView(this.id)
   }
 
   handleClick(e) {
